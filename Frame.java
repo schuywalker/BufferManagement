@@ -8,25 +8,23 @@ public class Frame {
     }
 
     public int getPin() {
-        // your code goes here
-        return 0; // you need to change the returned value
+        return pinCount;
     }
 
     public void incPin() {
-        // your code goes here
+        pinCount++;
     }
 
     public void decPin() {
-        // your code goes here
+        pinCount--;
     }
 
     public boolean isDirty() {
-        // your code goes here
-        return true; // you need to change the returned value
+        return this.dirty;
     }
 
     public void setDirty(boolean dirty) {
-        // your code goes here
+        this.dirty = !dirty;
     }
 
     public void displayPage() {

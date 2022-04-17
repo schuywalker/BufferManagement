@@ -14,16 +14,34 @@ public class BufHashTbl {
 
     public void insert(int pageNum, int frameNum) {
         // your code goes here
+        if (frameNum < 0 || frameNum > records.size()) { // do I need this if block?
+            System.out.println("that frame number does not exist");
+            return;
+        }
+        else {
+            records.get(pageNum % tableSize).add(new BufTblRecord(pageNum, frameNum));
+        }
     }
 
     public int lookup(int pageNum) {
-        // your code goes here
-        return 0;  // you need to change the returned value
+        List<BufTblRecord> frameRecord = records.get(pageNum % tableSize);
+        for (int i = 0; i < frameRecord.size(); i++){
+            if (frameRecord.get(i).pageNum == pageNum) {
+                return frameRecord.get(i).frameNum; //found it
+            }
+        }
+        return -1; // didnt find it
     }
 
     public boolean remove(int pageNum, int frameNum) {
-        // your code goes here
-        return true; // you need to change the returned value
+        List<BufTblRecord> rec = records.get(pageNum % tableSize);
+        for (int i = 0; i < rec.size(); i++) {
+            if (rec.get(i).pageNum == pageNum && rec.get(i).frameNum == frameNum) {
+                rec.remove(i);
+                return true;
+            }
+        }
+        return false;
     }
 
     private static class BufTblRecord {
