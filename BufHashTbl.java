@@ -27,7 +27,7 @@ public class BufHashTbl {
         List<BufTblRecord> frameRecord = records.get(pageNum % tableSize);
         for (int i = 0; i < frameRecord.size(); i++){
             if (frameRecord.get(i).pageNum == pageNum) {
-                return frameRecord.get(i).frameNum; //found it
+                return frameRecord.get(i).frameNum; // found page, return frame number
             }
         }
         return -1; // didnt find it
