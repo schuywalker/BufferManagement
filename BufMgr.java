@@ -1,3 +1,4 @@
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -5,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class BufMgr {
     private BufHashTbl bufTbl;
@@ -21,6 +23,8 @@ public class BufMgr {
         lruQueue = new ArrayList<>(poolSize);
     }
 
+    // 'I want page x protocol'
+    // note: a pin represents a tally for an outside object/process that is using a frame.
     public void pin(int pageNum) {
 
         int frameLookup = bufTbl.lookup(pageNum);
@@ -49,16 +53,20 @@ public class BufMgr {
 
     }
 
+    // 'I'm done with page X' protocol
     public void unpin(int pageNum) {
         int frameNum = bufTbl.lookup(pageNum);
         if (frameNum < 0) {
             System.out.println("this page isn't in the pool.");
+            // throw
             return;
         }
         pool[frameNum].decPin();
         if (pool[frameNum].getPin() == 0){
+            /////////////////////////////////////////////
             if (pool[frameNum].isDirty()){
-                // overwrite contents back to page (txt file)
+                // dont need anything here I think,
+                // because we write page back when it comes out of the lruQ
             }
             lruQueue.add(frameNum); // add freed up frame to end of queue
         }
@@ -67,7 +75,7 @@ public class BufMgr {
     public void createPage(int pageNum) {
         String name = getPageFileName(pageNum);
         String contents = "This is page " + pageNum + ".";
-        FileWriter writer = null;
+        FileWriter writer;
 
         try {
             writer = new FileWriter(name, false);
@@ -80,22 +88,26 @@ public class BufMgr {
     }
 
     // she had this as returning void - ask her about this???
+    // readPage(): read from disk to buffer, i.e., read the corresponding .txt file.
     public String readPage(int pageNum) {
-        // your code goes here
         String fileName = getPageFileName(pageNum);
-        FileReader reader = null;
-
+        Scanner reader;
+        String pageContent = "";
         try {
-            // reader sucks. implement using nio Files and Path tomorrow.
-
-            reader = new FileReader(fileName);
+            reader = new Scanner(fileName);
+            while (reader.hasNextLine()){
+                    pageContent += reader.nextLine();
+            }
             reader.close();
-        } catch (IOException e ){
+        } catch (Exception e ){
             e.printStackTrace();
         }
-return "";
+        // assigning frame content to pageContent will happen in pin.
+        // displayPage prints pageContent
+        return pageContent;
     }
 
+    // writePage(): write from buffer to disk, i.e., overwrite the corresponding .txt file.
     public void writePage(int pageNum) {
         // write from buffer to disk, i.e., overwrite the corresponding .txt file.
         int frameNum = bufTbl.lookup(pageNum);
@@ -113,13 +125,14 @@ return "";
         }
     }
 
+    // display the contents in the current frame.
     public void displayPage(int pageNum) {
         Integer frameNum = bufTbl.lookup(pageNum);
         if (frameNum == null) throw new IllegalArgumentException("Cannot display page that is not in memory");
-
-        //// pool[frameNum].displayPage();
+        System.out.println(readPage(pageNum));
     }
 
+    // append the new contents to the current frame.
     public void updatePage(int pageNum, String toAppend) {
         Integer frameNum = bufTbl.lookup(pageNum);
         if (frameNum == null) throw new IllegalArgumentException("Cannot update page that is not in memory");

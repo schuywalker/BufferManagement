@@ -12,8 +12,9 @@ public class BufHashTbl {
         }
     }
 
+    //  insert(): insert a < page#, frame#> pair into the page table.
     public void insert(int pageNum, int frameNum) {
-        // your code goes here
+
         if (frameNum < 0 || frameNum > records.size()) { // do I need this if block?
             System.out.println("that frame number does not exist");
             return;
@@ -23,6 +24,7 @@ public class BufHashTbl {
         }
     }
 
+    // lookup(): search for a page from the page table, and return the frame# if the page is found.
     public int lookup(int pageNum) {
         List<BufTblRecord> frameRecord = records.get(pageNum % tableSize);
         for (int i = 0; i < frameRecord.size(); i++){
@@ -33,6 +35,7 @@ public class BufHashTbl {
         return -1; // didnt find it
     }
 
+    // remove(): remove a < page#, frame#> pair from the page table.
     public boolean remove(int pageNum, int frameNum) {
         List<BufTblRecord> rec = records.get(pageNum % tableSize);
         for (int i = 0; i < rec.size(); i++) {
