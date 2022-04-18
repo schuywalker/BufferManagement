@@ -23,9 +23,9 @@ public class BufMgr {
         lruQueue = new ArrayList<>(poolSize);
     }
 
+    public void pin(int pageNum) {
     // 'I want page x protocol'
     // note: a pin represents a tally for an outside object/process that is using a frame.
-    public void pin(int pageNum) {
 
         int frameLookup = bufTbl.lookup(pageNum);
         if (frameLookup >= 0) { // page already in queue.
@@ -39,22 +39,23 @@ public class BufMgr {
             • Read requested page into chosen frame – Set pincount = 1
                 – Set dirty bit = false
              */
-            int newFrameNum = lruQueue.remove(0); // next available frameNum
+
 
             if (pool[frameLookup].isDirty()) {
                 this.writePage(frameLookup); // how to get pageNum to write to
                 pool[frameLookup].setDirty(false);
             }
-            Frame newFrame = new Frame(this.readPage(pageNum));
-            pool[newFrameNum] = newFrame;
+
+            //int newFrameNum = lruQueue.get(0); // delete when sure lookup below gets same value
+
+            this.readPage(pageNum);
+
+            int newFrameNum = bufTbl.lookup(pageNum); // if changing readPage return type, could return frameNum
             pool[newFrameNum].incPin();
-            bufTbl.insert(pageNum, newFrameNum);
         }
-
     }
-
-    // 'I'm done with page X' protocol
     public void unpin(int pageNum) {
+    // 'I'm done with page X' protocol
         int frameNum = bufTbl.lookup(pageNum);
         if (frameNum < 0) {
             System.out.println("this page isn't in the pool.");
@@ -71,7 +72,6 @@ public class BufMgr {
             lruQueue.add(frameNum); // add freed up frame to end of queue
         }
     }
-
     public void createPage(int pageNum) {
         String name = getPageFileName(pageNum);
         String contents = "This is page " + pageNum + ".";
@@ -87,9 +87,10 @@ public class BufMgr {
         }
     }
 
-    // she had this as returning void - ask her about this???
+    public void readPage(int pageNum) {
     // readPage(): read from disk to buffer, i.e., read the corresponding .txt file.
-    public String readPage(int pageNum) {
+
+        //// get file contents
         String fileName = getPageFileName(pageNum);
         Scanner reader;
         String pageContent = "";
@@ -102,13 +103,16 @@ public class BufMgr {
         } catch (Exception e ){
             e.printStackTrace();
         }
-        // assigning frame content to pageContent will happen in pin.
-        // displayPage prints pageContent
-        return pageContent;
+        // "FRAME CONSTRUCTION SUITE"
+        // get Q position (same as in pin but now we remove - doing this to keep return types same as teachers)
+        int newFrameNum = lruQueue.remove(0); // next available frameNum
+        Frame newFrame = new Frame(pageContent); // make frame
+        pool[newFrameNum] = newFrame; // put frame in pool
+        bufTbl.insert(pageNum,newFrameNum); // put reference in bufTbl for retrieval of frameNum via pageNum
     }
 
-    // writePage(): write from buffer to disk, i.e., overwrite the corresponding .txt file.
     public void writePage(int pageNum) {
+    // writePage(): write from buffer to disk, i.e., overwrite the corresponding .txt file.
         // write from buffer to disk, i.e., overwrite the corresponding .txt file.
         int frameNum = bufTbl.lookup(pageNum);
         String name = getPageFileName(pageNum);
@@ -125,15 +129,16 @@ public class BufMgr {
         }
     }
 
-    // display the contents in the current frame.
     public void displayPage(int pageNum) {
+    // display the contents in the current frame.
         Integer frameNum = bufTbl.lookup(pageNum);
         if (frameNum == null) throw new IllegalArgumentException("Cannot display page that is not in memory");
-        System.out.println(readPage(pageNum));
+
+        System.out.println(pool[frameNum].getContent());
     }
 
-    // append the new contents to the current frame.
     public void updatePage(int pageNum, String toAppend) {
+    // append the new contents to the current frame.
         Integer frameNum = bufTbl.lookup(pageNum);
         if (frameNum == null) throw new IllegalArgumentException("Cannot update page that is not in memory");
 
