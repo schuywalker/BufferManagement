@@ -24,7 +24,7 @@ public class BufHashTbl {
         }
     }
 
-    public int lookup(int pageNum) {
+    public Integer lookup(int pageNum) {
     // lookup(): search for a page from the page table, and return the frame# if the page is found.
         List<BufTblRecord> frameRecord = records.get(pageNum % tableSize);
         for (int i = 0; i < frameRecord.size(); i++){
@@ -32,7 +32,7 @@ public class BufHashTbl {
                 return frameRecord.get(i).frameNum; // found page, return frame number
             }
         }
-        return -1; // didnt find it
+        return null; // didnt find it
     }
 
     public boolean remove(int pageNum, int frameNum) {

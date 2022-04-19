@@ -18,7 +18,7 @@ public class BufMgr {
         this.poolSize = poolSize;
         this.pool = new Frame[poolSize];
         lruQueue = new ArrayList<>();
-        for (int i = 0; i < poolSize; i++) {
+        for (int i = 0; i <= poolSize; i++) {
             lruQueue.add(i);
         }
 
@@ -28,9 +28,9 @@ public class BufMgr {
     // 'I want page x protocol'
     // note: a pin represents a tally for an outside object/process that is using a frame.
 
-        int frameNum = bufTbl.lookup(pageNum);
+        Integer frameNum = bufTbl.lookup(pageNum);
 
-        if (frameNum >= 0) { // page already in queue.
+        if (frameNum != null) { // page already in queue.
             pool[frameNum].incPin();
         }
 
@@ -45,9 +45,11 @@ public class BufMgr {
              */
 
 
-        else { // frameNum < 0
+        else { // frameNum is not null
 
             frameNum = lruQueue.get(0); // Choose a frame for replacement using a page replacement policy
+
+
 
             if (pool[frameNum] != null && pool[frameNum].isDirty()) { // write contents of frame back to the file whos pageNum it's holding
                 this.writePage(frameNum);
@@ -55,7 +57,7 @@ public class BufMgr {
 
             this.readPage(pageNum); // read file $pageNum.txt to the available frame
             pool[frameNum].incPin();
-
+            used++;
         }
     }
     public void unpin(int pageNum) {
@@ -145,7 +147,7 @@ public class BufMgr {
         if (frameNum == null) throw new IllegalArgumentException("Cannot update page that is not in memory");
 
         pool[frameNum].updatePage(toAppend);
-    } // appends frame in pool
+    }
 
     private String getPageFileName(int pageNum) {
         return pageNum + ".txt";
