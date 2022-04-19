@@ -1,7 +1,4 @@
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,8 +17,10 @@ public class BufMgr {
         bufTbl = new BufHashTbl();
         this.poolSize = poolSize;
         this.pool = new Frame[poolSize];
-        lruQueue = new ArrayList<>(poolSize);
-
+        lruQueue = new ArrayList<>();
+        for (int i = 0; i < poolSize; i++) {
+            lruQueue.add(i);
+        }
     }
 
     public void pin(int pageNum) {
