@@ -21,6 +21,7 @@ public class BufMgr {
         this.poolSize = poolSize;
         this.pool = new Frame[poolSize];
         lruQueue = new ArrayList<>(poolSize);
+
     }
 
     public void pin(int pageNum) {
@@ -28,10 +29,11 @@ public class BufMgr {
     // note: a pin represents a tally for an outside object/process that is using a frame.
 
         int frameLookup = bufTbl.lookup(pageNum);
-        if (frameLookup >= 0) { // page already in queue.
-            pool[frameLookup].incPin();
-        }
-        else { // page not in queue
+
+//        if (frameLookup >= 0 && pool[frameLookup] != null) { // page already in queue.
+//            pool[frameLookup].incPin();
+//        }
+        if (frameLookup < 0){ // page not in queue
             /*
             Choose a frame for replacement using a page replacement policy
                 – must choose a frame with pincount == 0
@@ -40,19 +42,18 @@ public class BufMgr {
                 – Set dirty bit = false
              */
 
+            // frameLookup will be -1, page not init'd
+                this.readPage(pageNum);
+                frameLookup = bufTbl.lookup(pageNum); // not sure if this will ever change variable???
 
-            if (pool[frameLookup].isDirty()) {
+
+            if (pool[frameLookup].isDirty()) { // page init'd but dirty
                 this.writePage(frameLookup); // how to get pageNum to write to
                 pool[frameLookup].setDirty(false);
             }
 
-            //int newFrameNum = lruQueue.get(0); // delete when sure lookup below gets same value
-
-            this.readPage(pageNum);
-
-            int newFrameNum = bufTbl.lookup(pageNum); // if changing readPage return type, could return frameNum
-            pool[newFrameNum].incPin();
         }
+            pool[frameLookup].incPin();
     }
     public void unpin(int pageNum) {
     // 'I'm done with page X' protocol
@@ -64,11 +65,7 @@ public class BufMgr {
         }
         pool[frameNum].decPin();
         if (pool[frameNum].getPin() == 0){
-            /////////////////////////////////////////////
-            if (pool[frameNum].isDirty()){
-                // dont need anything here I think,
-                // because we write page back when it comes out of the lruQ
-            }
+            pool[frameNum].setDirty(true);
             lruQueue.add(frameNum); // add freed up frame to end of queue
         }
     }
@@ -90,7 +87,7 @@ public class BufMgr {
     public void readPage(int pageNum) {
     // readPage(): read from disk to buffer, i.e., read the corresponding .txt file.
 
-        //// get file contents
+        // get file contents
         String fileName = getPageFileName(pageNum);
         Scanner reader;
         String pageContent = "";
