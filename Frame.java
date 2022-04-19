@@ -16,7 +16,11 @@ public class Frame {
     }
 
     public void decPin() {
-        pinCount--;
+        if (pinCount > 0) {
+            pinCount--;
+        } else {
+            pinCount = 0;
+        }
     }
 
     public boolean isDirty() {

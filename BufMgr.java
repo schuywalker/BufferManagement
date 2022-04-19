@@ -21,18 +21,21 @@ public class BufMgr {
         for (int i = 0; i < poolSize; i++) {
             lruQueue.add(i);
         }
+
     }
 
     public void pin(int pageNum) {
     // 'I want page x protocol'
     // note: a pin represents a tally for an outside object/process that is using a frame.
 
-        int frameLookup = bufTbl.lookup(pageNum);
+        int frameNum = bufTbl.lookup(pageNum);
 
-//        if (frameLookup >= 0 && pool[frameLookup] != null) { // page already in queue.
-//            pool[frameLookup].incPin();
-//        }
-        if (frameLookup < 0){ // page not in queue
+        if (frameNum >= 0) { // page already in queue.
+            pool[frameNum].incPin();
+        }
+
+
+            // page not in queue
             /*
             Choose a frame for replacement using a page replacement policy
                 – must choose a frame with pincount == 0
@@ -41,18 +44,19 @@ public class BufMgr {
                 – Set dirty bit = false
              */
 
-            // frameLookup will be -1, page not init'd
-                this.readPage(pageNum);
-                frameLookup = bufTbl.lookup(pageNum); // not sure if this will ever change variable???
 
+        else { // frameNum < 0
 
-            if (pool[frameLookup].isDirty()) { // page init'd but dirty
-                this.writePage(frameLookup); // how to get pageNum to write to
-                pool[frameLookup].setDirty(false);
+            frameNum = lruQueue.get(0); // Choose a frame for replacement using a page replacement policy
+
+            if (pool[frameNum] != null && pool[frameNum].isDirty()) { // write contents of frame back to the file whos pageNum it's holding
+                this.writePage(frameNum);
             }
 
+            this.readPage(pageNum); // read file $pageNum.txt to the available frame
+            pool[frameNum].incPin();
+
         }
-            pool[frameLookup].incPin();
     }
     public void unpin(int pageNum) {
     // 'I'm done with page X' protocol
@@ -90,8 +94,9 @@ public class BufMgr {
         String fileName = getPageFileName(pageNum);
         Scanner reader;
         String pageContent = "";
+        File file = new File(fileName);
         try {
-            reader = new Scanner(fileName);
+            reader = new Scanner(file);
             while (reader.hasNextLine()){
                     pageContent += reader.nextLine();
             }
@@ -108,7 +113,7 @@ public class BufMgr {
     }
 
     public void writePage(int pageNum) {
-    // writePage(): write from buffer to disk, i.e., overwrite the corresponding .txt file.
+        // writePage(): write from buffer to disk, i.e., overwrite the corresponding .txt file.
         // write from buffer to disk, i.e., overwrite the corresponding .txt file.
         int frameNum = bufTbl.lookup(pageNum);
         String name = getPageFileName(pageNum);
@@ -123,6 +128,7 @@ public class BufMgr {
             e.printStackTrace();
             System.out.println("Something went wrong while creating the page");
         }
+        pool[frameNum].setDirty(false);
     }
 
     public void displayPage(int pageNum) {
