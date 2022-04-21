@@ -28,7 +28,7 @@ public class Frame {
     }
 
     public void setDirty(boolean dirty) {
-        this.dirty = !dirty;
+        this.dirty = dirty;
     }
 
     public void displayPage() {

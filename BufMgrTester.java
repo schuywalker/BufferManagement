@@ -27,21 +27,31 @@ public class BufMgrTester {
                 case 2:
                     System.out.print("Enter page number to be requested: ");
                     int arg2 = s.nextInt();
-                    bufMgr.pin(arg2);
-                    bufMgr.displayPage(arg2);
+                    boolean success = bufMgr.pin(arg2);
+                    if (success == true) {
+                        bufMgr.displayPage(arg2);
+                    }
+//                    else {
+//                        System.out.println("Either page has not yet been inserted or " +
+//                                "all frames are in use and you need to relinquish one before proceeding.");
+//                    }
                     break;
                 case 3:
                     System.out.print("Enter page number to update: ");
                     int arg3 = s.nextInt();
                     s.nextLine(); //Eat leftover newline
-                    bufMgr.displayPage(arg3);
-                    System.out.print("Input text to append: ");
-                    bufMgr.updatePage(arg3, s.nextLine());
+                    if (bufMgr.displayPage(arg3)) {
+                        System.out.print("Input text to append: ");
+                        bufMgr.updatePage(arg3, s.nextLine());
+                    }
                     break;
                 case 4:
                     System.out.print("Enter page number to be relinquished: ");
                     int arg4 = s.nextInt();
                     bufMgr.unpin(arg4);
+                    break;
+                case 5:
+                    bufMgr.printEverything();
                     break;
                 default:
                     System.out.println("Invalid option selected");
@@ -51,6 +61,6 @@ public class BufMgrTester {
     }
 
     private static void displayMenu() {
-        System.out.println("1. Create pages\n2. Request a page\n3. Update a page\n4. Relinquish a page\n-1. Quit");
+        System.out.println("1. Create pages\n2. Request a page\n3. Update a page\n4. Relinquish a page\n5. print pool and lruQueue\n-1. Quit");
     }
 }
