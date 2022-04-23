@@ -34,17 +34,6 @@ public class BufMgr {
             pool[frameNum].incPin();
         }
 
-
-            // page not in queue
-            /*
-            Choose a frame for replacement using a page replacement policy
-                – must choose a frame with pincount == 0
-            • If frame is dirty, write the old (“dirty”) page back to disk
-            • Read requested page into chosen frame – Set pincount = 1
-                – Set dirty bit = false
-             */
-
-
         else { // frameNum is not null
 
             if(lruQueue.isEmpty()) { // all frames are full
@@ -58,10 +47,8 @@ public class BufMgr {
                 this.writePage(availableFrame);
             }
 
-
-            this.readPage(pageNum); // read file $pageNum.txt to the available frame
+            this.readPage(pageNum);
             pool[bufTbl.lookup(pageNum)].incPin();
-            //used++;/////////
         }
         return true;
     }
@@ -70,7 +57,6 @@ public class BufMgr {
         Integer frameNum = bufTbl.lookup(pageNum);
         if (frameNum == null) {
             System.out.println("this page isn't in the pool.");
-            // throw
             return;
         }
         pool[frameNum].decPin();
@@ -124,7 +110,6 @@ public class BufMgr {
         // write from buffer to disk, i.e., overwrite the corresponding .txt file.
         Integer frameNum = bufTbl.lookup(pageNum);
         String name = getPageFileName(pageNum);
-        // String contents = "This is page " + pageNum + ".";
         FileWriter writer = null;
 
         try {
@@ -165,15 +150,11 @@ public class BufMgr {
     }
 
     public void printEverything(){
-//        private BufHashTbl bufTbl;
-//        private Frame[] pool;
-//        private int poolSize;
-//        private List<Integer> lruQueue;
-//        private int used = 0;
+
         System.out.println("Pool: ");
         for (int i = 0; i < pool.length; i++) {
             if (pool[i] != null) {
-            System.out.println("\tframe "+i+"\npinCount: "+pool[i].getPin() + " \ncontent: \n\""+pool[i].getContent() + "\"\ndirty? "+pool[i].isDirty());
+            System.out.println("\tFRAME "+i+"\npinCount: "+pool[i].getPin() + " \ncontent: \n\""+pool[i].getContent() + "\"\ndirty? "+pool[i].isDirty());
 
             } else {
                 System.out.print("\t"+i+"NULL FRAME ");

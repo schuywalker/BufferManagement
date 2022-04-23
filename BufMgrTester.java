@@ -31,10 +31,6 @@ public class BufMgrTester {
                     if (success == true) {
                         bufMgr.displayPage(arg2);
                     }
-//                    else {
-//                        System.out.println("Either page has not yet been inserted or " +
-//                                "all frames are in use and you need to relinquish one before proceeding.");
-//                    }
                     break;
                 case 3:
                     System.out.print("Enter page number to update: ");

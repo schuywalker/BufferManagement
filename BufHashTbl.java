@@ -2,7 +2,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BufHashTbl {
-    private final List<List<BufTblRecord>> records; //Forced to make double list of lists because java doesn't support arrays of generics for some dumb reason
+    private final List<List<BufTblRecord>> records;
+    // ^^^ Forced to make double list of lists because java doesn't support arrays of generics for some dumb reason
     private final int tableSize = 10;
 
     public BufHashTbl() {
@@ -26,7 +27,7 @@ public class BufHashTbl {
 
     public Integer lookup(int pageNum) {
     // lookup(): search for a page from the page table, and return the frame# if the page is found.
-        List<BufTblRecord> frameRecord = records.get(pageNum); // remvoved % tableSize
+        List<BufTblRecord> frameRecord = records.get(pageNum);
         for (int i = 0; i < frameRecord.size(); i++){
             if (frameRecord.get(i).pageNum == pageNum) {
                 return frameRecord.get(i).frameNum; // found page, return frame number
